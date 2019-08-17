@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Cache-Control" content="no-cache" />
+<meta http-equiv="CONTENT-TYPE" content="text/html; charset=utf-8" />
+<script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
+<title>Photo on Canvas</title>
+</head>
+<body>
+<h1>Canvas</h1>
+<div id="info"></div>
+<canvas id="mihon_area" height="767" width="1280"></canvas>
+
+<canvas id="draw_area" height="767" width="1280"></canvas>
+<canvas id="draw_test" height="767" width="1280"></canvas>
+
+
+
+<script >
+
+var isDraw = false;    
+
+window.onload = function()
+{
+    var canvas_mihon = document.getElementById ("mihon_area")
+    var canvas= document.getElementById ("draw_area")
+    var canvas_test = document.getElementById ("draw_test")
+
+    var ctx = canvas.getContext('2d')
+    var ctx_mihon = canvas_mihon.getContext('2d')
+
+    //var stage_draw  = new createjs.Stage("draw_area");
+
+    // createJS用
+    // var stage  = new createjs.Stage("draw_area");
+    // stage.addEventListener("stagemousedown", handleDown);
+    // stage.addEventListener("stagemouseup", handleUp);
+    // stage.addEventListener("stagemousemove", handleMove);
+
+
+      //マウスの座標を取得
+      var mouse = {
+        startX: 0,
+        startY: 0,
+        x: 0,
+        y: 0,
+        color: "black",
+        isDrawing: false
+      };
+      var borderWidth = 1;
+      canvas.addEventListener("mousemove", function(e){
+        //2.マウスが動いたら座標値を取得
+            var rect = e.target.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left - borderWidth;
+            mouse.y = e.clientY - rect.top - borderWidth;
+            /*
+            pageX[Y], offsetLeft[Top]を使う場合
+            mouse.x = e.pageX - canvas.offsetLeft - borderWidth;
+            mouse.y = e.pageY - canvas.offsetTop - borderWidth;
+            */
+        //3.情報をinfoに出力
+            document.getElementById("info").innerHTML =
+        " clientX = " + Math.floor(e.clientX) + "px" +
+        " clientY = " + Math.floor(e.clientY) + "px" + '<br>' +
+        " rect.left = " + Math.floor(rect.left) + "px" +
+            " rect.top = " + Math.floor(rect.top) + "px" + '<br><br>' +
+        " pageX = " + Math.floor(e.pageX) + "px" +
+        " pageY = " + Math.floor(e.pageY) + "px" + '<br>' +
+        ' offsetLeft = ' + Math.floor(canvas.offsetLeft) + "px" +
+        ' offsetTop = ' + Math.floor(canvas.offsetTop) + "px" + '<br><br>' +
+            " canvas x座標 = " + Math.floor(mouse.x) + "px" +
+            " canvas y座標 = " + Math.floor(mouse.y) + "px" + '<br>';
+        //4.isDrawがtrueのとき描画
+            if (mouse.isDrawing){
+                ctx.beginPath();
+                ctx.moveTo(mouse.startX, mouse.startY);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.strokeStyle = mouse.color;
+                ctx.stroke();
+                mouse.startX = mouse.x;
+                mouse.startY = mouse.y;
+            }
+      });
+      //5.マウスを押したら、描画OK(myDrawをtrue)
+      canvas.addEventListener("mousedown", function(e){
+        mouse.isDrawing = true;
+        mouse.startX = mouse.x;
+        mouse.startY = mouse.y;
+      });
+      //6.マウスを上げたら、描画禁止(myDrawをfalse)
+        canvas.addEventListener("mouseup", function(e){
+            mouse.isDrawing = false;
+        });
+      canvas.addEventListener('mouseleave', function(e){
+        mouse.isDrawing = false;
+      });
+
+ 
+    var img = new Image()
+    //img.src = "./family-557100_1280.jpg"
+    img.src = "https://scratchpad.jp/wp-content/uploads/2019/04/IMG_20190419_014126.jpg"
+    img.onload = function()
+        {
+
+        ctx_mihon.drawImage(img, 0, 0)
+        drawDivideLine(ctx_mihon);
+        drawBorder(ctx);
+
+
+
+//---------線を引く------------------
+        
+        function drawDivideLine(ctx){
+    
+            var divideNumber = 4;
+            var dividedWidth = img.naturalWidth / divideNumber ;
+            var dividedHeight = img.naturalHeight / divideNumber ;
+
+            var dividedWidthPoints =  new Array();
+            var dividedHeighthPoints = new Array();
+            for (var i=0; i <= divideNumber  ; i++ ){
+                dividedWidthPoints[i] = i * dividedWidth;
+                dividedHeighthPoints[i] = i * dividedHeight;            
+            }
+
+            // console.log(dividedHeighthPoints);
+            // console.log(dividedWidthPoints);
+
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "rgb(0, 0, 255)"
+
+
+            //横線
+            for(var i=0; i < divideNumber; i++){
+                ctx.beginPath();
+
+                ctx.moveTo(0, dividedHeighthPoints[i]);
+                ctx.lineTo(dividedWidthPoints[divideNumber], dividedHeighthPoints[i]);
+                ctx.closePath();
+                ctx.stroke();
+                console.log(i);
+            }
+
+            //縦線
+            for(var i=0; i < divideNumber; i++){
+                ctx.beginPath();
+
+                ctx.moveTo(dividedWidthPoints[i], 0);
+                ctx.lineTo(dividedWidthPoints[i], dividedHeighthPoints[divideNumber]);
+                ctx.closePath();
+                ctx.stroke();
+                console.log(i);
+            }
+
+        }
+
+//   -------------------
+
+        //drawDivideLine(img);
+        }
+
+        function drawBorder(ctx){
+            ctx.beginPath();
+            ctx.moveTo(0,0);
+            ctx.lineTo(img.naturalWidth,0);
+            ctx.lineTo(img.naturalWidth, img.naturalHeight);
+            ctx.lineTo(0, img.naturalHeight);
+            ctx.lineTo(0, 0);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+
+        function copyDisplayImg(stage){
+            // var bmp = new createjs.Bitmap(img.src);
+            var bmp = new createjs.Bitmap(img.src);
+            bmp.x= 0;
+            bmp.y= 0;
+            bmp.alpha = 0.1;
+            stage.addChild(bmp);
+            stage.update();
+        }
+
+
+
+
+        function drawDivideLine(img){
+            console.log('hixxxx');
+        }
+
+           function handleDown(event){
+        isDraw = true;
+        console.log('down' + 2 * Math.random()) ;
+        penline = new createjs.Shape();
+        penline.graphics.beginStroke('DarkRed');
+    }
+
+    function handleUp(event){
+        console.log('up');
+    // stage.addChild(penline);
+    //   stage.update();
+        isDraw = false;
+        lastPosition.x = null;
+        lastPosition.y = null;
+
+    }
+
+    var lastPosition = {x:null, y:null};
+    function handleMove(event){
+        if(!isDraw){return;}
+        console.log('a>' + isDraw);
+        if(lastPosition.x != null){
+        console.log('b>' + lastPosition.x);
+
+            penline.graphics.moveTo(lastPosition.x, lastPosition.y).lineTo(stage.mouseX, stage.mouseY); 
+            stage.addChild(penline);
+            stage.update();    
+        }
+
+        console.log('move');
+        lastPosition.x = stage.mouseX;
+        lastPosition.y = stage.mouseY;
+    }
+
+
+
+
+
+
+
+}
+
+function testhi(){
+    alert('hi');
+}
+
+
+
+</script>
+
+</body>
+
+
+
+</html>

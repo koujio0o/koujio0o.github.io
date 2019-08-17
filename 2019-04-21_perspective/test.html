@@ -1,0 +1,42 @@
+
+<html>
+<body></body>
+
+
+<script
+  src="https://code.jquery.com/jquery-3.4.0.js"
+  integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
+  crossorigin="anonymous"></script>
+
+<script>
+var div;
+var i;
+for(i=0; i<3; i++) {
+    div = $('<div/>').click( function( e ) {
+        alert(i)
+    } );
+    div.html('click me - ' + i); 
+    div.css('cursor', 'pointer');
+    $('body').append(div);
+}
+
+
+var hoge = function(a){
+	var test = a;
+	return function(){
+		console.log('cl >' + test );
+		test++;
+	}
+}
+
+var uho  = hoge(2);
+uho();
+uho();
+
+var uho  = hoge(2);
+uho();
+uho();
+
+
+</script>
+</html>
