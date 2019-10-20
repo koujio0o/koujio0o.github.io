@@ -1,43 +1,42 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Cache-Control" content="no-cache" />
-<meta http-equiv="CONTENT-TYPE" content="text/html; charset=utf-8" />
-<script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
-<title>Photo on Canvas</title>
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="CONTENT-TYPE" content="text/html; charset=utf-8" />
+    <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
+    <title>Photo on Canvas</title>
 </head>
 <body>
-<h1>Canvas</h1>
-<div id="info"></div>
-<canvas id="mihon_area" height="767" width="1280"></canvas>
+    <h1>Canvas</h1>
+    <div id="info"></div>
+    <canvas id="mihon_area" height="767" width="1280"></canvas>
 
-<canvas id="draw_area" height="767" width="1280"></canvas>
-<canvas id="draw_test" height="767" width="1280"></canvas>
+    <canvas id="draw_area" height="767" width="1280"></canvas>
+    <canvas id="draw_test" height="767" width="1280"></canvas>
 
 
 
-<script >
+    <script >
 
-var isDraw = false;    
+        var isDraw = false;    
 
-window.onload = function()
-{
-    var canvas_mihon = document.getElementById ("mihon_area")
-    var canvas= document.getElementById ("draw_area")
-    var canvas_test = document.getElementById ("draw_test")
+        window.onload = function()
+        {
+            var canvas_mihon = document.getElementById ("mihon_area")
+            var canvas= document.getElementById ("draw_area")
+            var canvas_test = document.getElementById ("draw_test")
 
-    var ctx = canvas.getContext('2d')
-    var ctx_mihon = canvas_mihon.getContext('2d')
+            var ctx = canvas.getContext('2d')
+            var ctx_mihon = canvas_mihon.getContext('2d')
 
-    var moveflg = 0,
-    Xpoint,
-    Ypoint;
-
+            var moveflg = 0,
+            Xpoint,
+            Ypoint;
 
 //初期値（サイズ、色、アルファ値）の決定
-var defSize = 7,
-    defColor = "#555";
+var defSize = 1,
+defColor = "#555";
 
     //var stage_draw  = new createjs.Stage("draw_area");
 
@@ -58,21 +57,21 @@ window.onload = initLocalStorage();
 function startPoint(e){
   e.preventDefault();
   ctx.beginPath();
- 
-    if(e.type == 'touchmove'){
-        const touch = e.changedTouches[0];
-        const bounds = touch.target.getBoundingClientRect();
-        Xpoint = touch.clientX - bounds.left;
-        Ypoint = touch.clientY - bounds.top ;
-    }else{
 
-        Xpoint = e.layerX;
-        Ypoint = e.layerY;
-    }
-   
-  ctx.moveTo(Xpoint, Ypoint);
+  if(e.type == 'touchmove'){
+    const touch = e.changedTouches[0];
+    const bounds = touch.target.getBoundingClientRect();
+    Xpoint = touch.clientX - bounds.left;
+    Ypoint = touch.clientY - bounds.top ;
+}else{
+
+    Xpoint = e.layerX;
+    Ypoint = e.layerY;
 }
- 
+
+ctx.moveTo(Xpoint, Ypoint);
+}
+
 function movePoint(e){
   if(e.buttons === 1 || e.witch === 1 || e.type == 'touchmove')
   {
@@ -88,33 +87,33 @@ function movePoint(e){
     }
 
     moveflg = 1;
-     
+
     ctx.lineTo(Xpoint, Ypoint);
     ctx.lineCap = "round";
-    ctx.lineWidth = defSize * 2;
+    ctx.lineWidth = defSize ;
     ctx.strokeStyle = defColor;
     ctx.stroke();
     console.log('move>' + Xpoint + ':Ypoint>' + Ypoint);
-     
-  }
+
 }
- 
+}
+
 function endPoint(e)
 {
- 
+
     if(moveflg === 0)
     {
-       ctx.lineTo(Xpoint-1, Ypoint-1);
-       ctx.lineCap = "round";
-       ctx.lineWidth = defSize * 2;
-       ctx.strokeStyle = defColor;
-       ctx.stroke();
-        
-    }
-    moveflg = 0;
-  setLocalStoreage();
+     ctx.lineTo(Xpoint-1, Ypoint-1);
+     ctx.lineCap = "round";
+     ctx.lineWidth = defSize * 2;
+     ctx.strokeStyle = defColor;
+     ctx.stroke();
+
+ }
+ moveflg = 0;
+ setLocalStoreage();
 }
- 
+
 function clearCanvas(){
     if(confirm('Canvasを初期化しますか？'))
     {
@@ -123,73 +122,73 @@ function clearCanvas(){
         resetCanvas();
     }
 }
- 
+
 function resetCanvas() {
     ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
 }
- 
+
 function chgImg()
 {
   var png = canvas.toDataURL();
- 
+
   document.getElementById("newImg").src = png;
 }
- 
+
 function initLocalStorage(){
     myStorage.setItem("__log", JSON.stringify([]));
 }
 function setLocalStoreage(){
     var png = canvas.toDataURL();
     var logs = JSON.parse(myStorage.getItem("__log"));
- 
+
     setTimeout(function(){
         logs.unshift({0:png});
- 
+
         myStorage.setItem("__log", JSON.stringify(logs));
- 
+
         currentCanvas = 0;
         temp = [];
     }, 0);
 }
- 
+
 function prevCanvas(){
     var logs = JSON.parse(myStorage.getItem("__log"));
- 
+
     if(logs.length > 0)
     {
         temp.unshift(logs.shift());
- 
+
         setTimeout(function(){
             myStorage.setItem("__log", JSON.stringify(logs));
             resetCanvas();
- 
+
             draw(logs[0]['png']);
- 
+
         }, 0);
     }
 }
- 
+
 function nextCanvas(){
     var logs = JSON.parse(myStorage.getItem("__log"));
- 
+
     if(temp.length > 0)
     {
         logs.unshift(temp.shift());
- 
+
         setTimeout(function(){
             myStorage.setItem("__log", JSON.stringify(logs));
             resetCanvas();
- 
+
             draw(logs[0]['png']);
- 
+
         }, 0);
     }
 }
- 
+
 function draw(src) {
     var img = new Image();
     img.src = src;
- 
+
     img.onload = function() {
         ctx.drawImage(img, 0, 0);
     }
@@ -253,12 +252,12 @@ function draw(src) {
       //   mouse.isDrawing = false;
       // });
 
- 
-    var img = new Image()
+
+      var img = new Image()
     //img.src = "./family-557100_1280.jpg"
     img.src = "https://scratchpad.jp/wp-content/uploads/2019/04/IMG_20190419_014126.jpg"
     img.onload = function()
-        {
+    {
 
         ctx_mihon.drawImage(img, 0, 0)
         drawDivideLine(ctx_mihon);
@@ -267,19 +266,19 @@ function draw(src) {
 
 
 //---------線を引く------------------
-        
-        function drawDivideLine(ctx){
-    
-            var divideNumber = 4;
-            var dividedWidth = img.naturalWidth / divideNumber ;
-            var dividedHeight = img.naturalHeight / divideNumber ;
 
-            var dividedWidthPoints =  new Array();
-            var dividedHeighthPoints = new Array();
-            for (var i=0; i <= divideNumber  ; i++ ){
-                dividedWidthPoints[i] = i * dividedWidth;
-                dividedHeighthPoints[i] = i * dividedHeight;            
-            }
+function drawDivideLine(ctx){
+
+    var divideNumber = 4;
+    var dividedWidth = img.naturalWidth / divideNumber ;
+    var dividedHeight = img.naturalHeight / divideNumber ;
+
+    var dividedWidthPoints =  new Array();
+    var dividedHeighthPoints = new Array();
+    for (var i=0; i <= divideNumber  ; i++ ){
+        dividedWidthPoints[i] = i * dividedWidth;
+        dividedHeighthPoints[i] = i * dividedHeight;            
+    }
 
             // console.log(dividedHeighthPoints);
             // console.log(dividedWidthPoints);
@@ -315,21 +314,21 @@ function draw(src) {
 //   -------------------
 
         //drawDivideLine(img);
-        }
+    }
 
-        function drawBorder(ctx){
-            ctx.beginPath();
-            ctx.moveTo(0,0);
-            ctx.lineTo(img.naturalWidth,0);
-            ctx.lineTo(img.naturalWidth, img.naturalHeight);
-            ctx.lineTo(0, img.naturalHeight);
-            ctx.lineTo(0, 0);
-            ctx.closePath();
-            ctx.stroke();
-        }
+    function drawBorder(ctx){
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(img.naturalWidth,0);
+        ctx.lineTo(img.naturalWidth, img.naturalHeight);
+        ctx.lineTo(0, img.naturalHeight);
+        ctx.lineTo(0, 0);
+        ctx.closePath();
+        ctx.stroke();
+    }
 
 
-        function copyDisplayImg(stage){
+    function copyDisplayImg(stage){
             // var bmp = new createjs.Bitmap(img.src);
             var bmp = new createjs.Bitmap(img.src);
             bmp.x= 0;
@@ -346,39 +345,39 @@ function draw(src) {
             console.log('hixxxx');
         }
 
-           function handleDown(event){
-        isDraw = true;
-        console.log('down' + 2 * Math.random()) ;
-        penline = new createjs.Shape();
-        penline.graphics.beginStroke('DarkRed');
-    }
-
-    function handleUp(event){
-        console.log('up');
-    // stage.addChild(penline);
-    //   stage.update();
-        isDraw = false;
-        lastPosition.x = null;
-        lastPosition.y = null;
-
-    }
-
-    var lastPosition = {x:null, y:null};
-    function handleMove(event){
-        if(!isDraw){return;}
-        console.log('a>' + isDraw);
-        if(lastPosition.x != null){
-        console.log('b>' + lastPosition.x);
-
-            penline.graphics.moveTo(lastPosition.x, lastPosition.y).lineTo(stage.mouseX, stage.mouseY); 
-            stage.addChild(penline);
-            stage.update();    
+        function handleDown(event){
+            isDraw = true;
+            console.log('down' + 2 * Math.random()) ;
+            penline = new createjs.Shape();
+            penline.graphics.beginStroke('DarkRed');
         }
 
-        console.log('move');
-        lastPosition.x = stage.mouseX;
-        lastPosition.y = stage.mouseY;
+        function handleUp(event){
+            console.log('up');
+    // stage.addChild(penline);
+    //   stage.update();
+    isDraw = false;
+    lastPosition.x = null;
+    lastPosition.y = null;
+
+}
+
+var lastPosition = {x:null, y:null};
+function handleMove(event){
+    if(!isDraw){return;}
+    console.log('a>' + isDraw);
+    if(lastPosition.x != null){
+        console.log('b>' + lastPosition.x);
+
+        penline.graphics.moveTo(lastPosition.x, lastPosition.y).lineTo(stage.mouseX, stage.mouseY); 
+        stage.addChild(penline);
+        stage.update();    
     }
+
+    console.log('move');
+    lastPosition.x = stage.mouseX;
+    lastPosition.y = stage.mouseY;
+}
 
 
 
