@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- USE DEVELOPMENT VERSION -->
+    <script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Konva Transform Events Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="chgBtn" type="button" name="test" onclick="chgImg()">押してね</button>
+
+    <div id="container"></div>
+    <script>
+
+        function chgImg(stage) {
+            console.log(stage);
+        }
+
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+
+        var stage = new Konva.Stage({
+            container: 'container',
+            width: width,
+            height: height,
+        });
+        var picLayer = new Konva.Layer();
+        var layer = new Konva.Layer();
+        stage.add(picLayer, layer);
+
+
+
+        // alternative API:
+        Konva.Image.fromURL('./img/test.jpg', function (darthNode) {
+            darthNode.setAttrs({
+                x: 200,
+                y: 50,
+                scaleX: 1,
+                scaleY: 1,
+            });
+            picLayer.add(darthNode);
+            picLayer.batchDraw();
+        });
+
+        var rect = new Konva.Rect({
+            x: 160,
+            y: 60,
+            width: 100,
+            height: 90,
+            // fill: 'red',
+            name: 'rect',
+            stroke: 'black',
+            draggable: true,
+        });
+        layer.add(rect);
+
+        var text = new Konva.Text({
+            x: 5,
+            y: 5,
+        });
+        layer.add(text);
+
+        // var button = new Konva.Label({
+        //     x: 100,
+        //     y: 20,
+        //     fill: 'green',
+        // });
+        // layer.add(button);
+        // button.add(new Konva.Text({
+        //     text: 'yearrrr',
+        //     fontSize: 10,
+        // }));
+
+        updateText();
+
+        // create new transformer
+        var tr = new Konva.Transformer();
+        layer.add(tr);
+        tr.nodes([rect]);
+        layer.draw();
+
+        rect.on('transformstart', function () {
+            console.log('transform start');
+        });
+
+        rect.on('dragmove', function () {
+            updateText();
+        });
+        rect.on('transform', function () {
+            updateText();
+            console.log('transform');
+        });
+
+        rect.on('transformend', function () {
+            console.log('transform end');
+        });
+
+        function updateText() {
+            var lines = [
+                'x: ' + rect.x(),
+                'y: ' + rect.y(),
+                'rotation: ' + rect.rotation(),
+                'width: ' + rect.width(),
+                'height: ' + rect.height(),
+                'scaleX: ' + rect.scaleX(),
+                'scaleY: ' + rect.scaleY(),
+            ];
+            text.text(lines.join('\n'));
+            layer.batchDraw();
+        }
+    </script>
+</body>
+
+</html>

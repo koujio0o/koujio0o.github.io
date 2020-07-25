@@ -1,0 +1,114 @@
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+    <meta http-equiv='x-ua-compatible' content='ie=edge'>
+</head>
+<style>
+    #disp {
+        color: grey;
+        font-size: 2px,
+    }
+</style>
+
+<body>
+    <div id='app'>
+        <div id="disp">
+            <div v-if="dispRatio">
+                ratioX: {{ ratio }} ratioY: {{ ratioY}}
+            </div>
+            <div>
+                dispRatio : {{dispRatio}}
+            </div>
+        </div>
+        <v-stage ref="stage" :config="configKonva">
+            <v-layer ref="layer">
+                <v-rect :config="configRect" />
+            </v-layer>
+        </v-stage>
+        <button @click="changeWidth">NEXT</button>
+        <button @click="dispRatio = !dispRatio">解答</button>
+    </div>
+
+
+
+
+    <!--1. Link Vue Javascript & Konva-->
+    <!-- <script src='https://unpkg.com/vue/dist/vue.js'></script> -->
+    <script src='vue.js'></script>
+    <script src='konva.min.js'></script>
+    <!--2. Link VueKonva Javascript (Plugin automatically installed)-->
+    <script src='vue_konva.js'></script>
+    <!-- <script src='index4.js'></script> -->
+
+    <script>
+        // 3. Create the Vue instance
+        new Vue({
+            el: '#app',
+            data: {
+                ratio: 0,
+                // ratioY: 0,
+                dispRatio: true,
+                configKonva: {
+                    width: 800,
+                    height: 600
+                },
+                configCircle: {
+                    x: 100,
+                    y: 100,
+                    radius: 70,
+                    fill: 'red',
+                    stroke: 'black',
+                    strokeWidth: 4
+                },
+                configRect: {
+                    x: 100,
+                    y: 100,
+                    width: 200,
+                    height: 300,
+                    stroke: 'green',
+                    strokeWidth: 2,
+                }
+            },
+            created: function () {
+                this.ratio = rand = (Math.random() * 2).toFixed(2);
+                // this.ratioY = (1 / this.ratio).toFixed(2);
+                this.configRect.height = this.configRect.width * this.ratio;
+            },
+            methods: {
+                changeWidth() {
+                    this.ratio = (Math.random() * 2).toFixed(2);
+                    this.configRect.height = this.configRect.width * this.ratio;
+                }
+            },
+            computed: {
+                // ratioY: function () {
+                ratioY() {
+                    return (1 / this.ratio).toFixed(2);
+                },
+                // configRect() {
+                //     return {
+                //         x: 100,
+                //         y: 100,
+                //         width: this.configRect.width,
+                //         height: this.configRect.width * this.ratio,
+                //         stroke: 'green',
+                //         strokeWidth: 2,
+                //     }
+                // }
+
+
+                // configRect():
+                // console.log('mounted');
+                // // this.ratioY = (1 / this.ratio).toFixed(2);
+                // console.log('hiiii');
+
+            },
+        })
+    </script>
+
+
+</body>
+
+</html>

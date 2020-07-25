@@ -1,0 +1,232 @@
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+    <meta http-equiv='x-ua-compatible' content='ie=edge'>
+</head>
+<style>
+    #disp {
+        color: grey;
+        font-size: 2px,
+    }
+</style>
+
+<body>
+    <div id='app'>
+        <div id="disp">
+            <div v-if="dispRatio">
+                ratioX: {{ ratio }} ratioY: {{ ratioY}}
+            </div>
+            <div>
+                dispRatio : {{dispRatio}}
+            </div>
+        </div>
+        <v-stage ref="stage" :config="configKonva" @mousedown="handleStageMouseDown">
+            <v-layer ref="layer">
+                <!-- <v-rect :config="configRect" @transformend="handleTransformEnd" /> -->
+                <v-rect v-for="item in rectangles" :key="item.id" :config="item" @transformend="handleTransformEnd"
+                    ref="uhoho" />
+                <!-- <v-transformer ref="transformer" /> -->
+
+            </v-layer>
+        </v-stage>
+        <button @click="changeWidth">NEXT</button>
+        <button @click="dispRatio = !dispRatio">解答</button>
+    </div>
+
+
+
+
+    <!--1. Link Vue Javascript & Konva-->
+    <!-- <script src='https://unpkg.com/vue/dist/vue.js'></script> -->
+    <script src='vue.js'></script>
+    <script src='konva.min.js'></script>
+    <!--2. Link VueKonva Javascript (Plugin automatically installed)-->
+    <script src='vue_konva.js'></script>
+    <!-- <script src='index4.js'></script> -->
+
+    <script>
+        // 3. Create the Vue instance
+        new Vue({
+            el: '#app',
+            data: {
+                ratio: 0,
+                // ratioY: 0,
+                dispRatio: true,
+                configKonva: {
+                    width: 800,
+                    height: 600
+                },
+                configCircle: {
+                    x: 100,
+                    y: 100,
+                    radius: 70,
+                    fill: 'red',
+                    stroke: 'black',
+                    strokeWidth: 4
+                },
+                configRect: {
+                    x: 100,
+                    y: 100,
+                    width: 200,
+                    height: 300,
+                    stroke: 'green',
+                    strokeWidth: 2,
+                    draggable: true,
+                    name: 'taro',
+                },
+                rectangles: [
+                    {
+                        rotation: 0,
+                        x: 10,
+                        y: 10,
+                        width: 100,
+                        height: 100,
+                        scaleX: 1,
+                        scaleY: 1,
+                        fill: "red",
+                        name: "rect1",
+                        draggable: true
+                    },
+                    {
+                        rotation: 0,
+                        x: 150,
+                        y: 150,
+                        width: 100,
+                        height: 100,
+                        scaleX: 1,
+                        scaleY: 1,
+                        fill: "green",
+                        name: "rect2",
+                        draggable: true
+                    }
+                ],
+                selectedShapeName: ""
+            },
+            created: function () {
+                this.ratio = rand = (Math.random() * 2).toFixed(2);
+                // this.ratioY = (1 / this.ratio).toFixed(2);
+                this.configRect.height = this.configRect.width * this.ratio;
+
+                var transformer = new Konva.transformeransformer();
+                layer.add(transformer);
+                transformer.nodes([rect]);
+                layer.draw();
+
+
+            },
+            methods: {
+                changeWidth() {
+                    this.ratio = (Math.random() * 2).toFixed(2);
+                    this.configRect.height = this.configRect.width * this.ratio;
+                },
+                handleMouseMove() {
+                    console.log('hi');
+                },
+                handleTransformEnd(e) {
+                    console.log('handleTransformEnd');
+
+                    // shape is transformed, let us save new attrs back to the node
+                    // find element in our state
+                    const rect = this.rectangles.find(r => r.name === this.selectedShapeName);
+                    // update the state
+                    rect.x = e.target.x();
+                    rect.y = e.target.y();
+                    rect.rotation = e.target.rotation();
+                    rect.scaleX = e.target.scaleX();
+                    rect.scaleY = e.target.scaleY();
+
+                    // change fill
+                    rect.fill = Konva.Util.getRandomColor();
+                },
+                handleStageMouseDown(e) {
+                    console.log('handleStageMouseDown');
+
+                    // clicked on stage - clear selection
+                    if (e.target === e.target.getStage()) {
+                        console.log('nyo');
+
+                        this.selectedShapeName = "";
+                        this.updateTransformer();
+                        return;
+                    }
+
+                    // clicked on transformer - do nothing
+                    const clickedOnTransformer =
+                        e.target.getParent().className === "Transformer";
+                    if (clickedOnTransformer) {
+                        console.log('return しないで');
+
+                        return;
+                    }
+
+                    // find clicked rect by its name
+                    const name = e.target.name();
+                    console.log('name');
+                    console.log(name);
+
+                    const rect = this.rectangles.find(r => r.name === name);
+                    if (rect) {
+                        this.selectedShapeName = name;
+                    } else {
+                        this.selectedShapeName = "";
+                    }
+
+                    console.log('ここまできた');
+
+                    this.updateTransformer();
+                },
+                updateTransformer() {
+                    // here we need to manually attach or detach Transformer node
+                    console.log('update');
+                    const transformerNode = this.$refs.transformer.getNode();
+                    const stage = transformerNode.getStage();
+                    const { selectedShapeName } = this;
+
+                    const selectedNode = stage.findOne("." + selectedShapeName);
+                    // do nothing if selected node is already attached
+                    if (selectedNode === transformerNode.node()) {
+                        return;
+                    }
+
+                    if (selectedNode) {
+                        // attach to another node
+                        transformerNode.attachTo(selectedNode);
+                    } else {
+                        // remove transformer
+                        transformerNode.detach();
+                    }
+                    transformerNode.getLayer().batchDraw();
+                },
+            },
+            computed: {
+                // ratioY: function () {
+                ratioY() {
+                    return (1 / this.ratio).toFixed(2);
+                },
+                // configRect() {
+                //     return {
+                //         x: 100,
+                //         y: 100,
+                //         width: this.configRect.width,
+                //         height: this.configRect.width * this.ratio,
+                //         stroke: 'green',
+                //         strokeWidth: 2,
+                //     }
+                // }
+
+
+                // configRect():
+                // console.log('mounted');
+                // // this.ratioY = (1 / this.ratio).toFixed(2);
+                // console.log('hiiii');
+
+            },
+        })
+    </script>
+
+
+</body>
+
+</html>
